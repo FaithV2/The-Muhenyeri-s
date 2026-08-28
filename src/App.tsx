@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import type { FormEvent } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 const wedding = {
@@ -11,7 +10,7 @@ const wedding = {
   venue: { name: 'Cresta Marang Gardens', address: 'Francistown, Botswana', description: 'A beautiful garden setting in Francistown for a day of faith, family and celebration.', map: 'https://maps.app.goo.gl/ezw6GAVfmNvCoVny5' },
   events: [
     { time: '30 OCT', name: 'Magadi Celebration', detail: 'Sekakangwe · Matenge Ward', description: 'Attire: Basadi Botlhe, red tukwi and the white tšale with blue stripes.' },
-    { time: '31 OCT', name: 'The Wedding Day', detail: 'Cresta Marang Garden · Francistown', description: 'A beautiful wedding celebration surrounded by family and friends.' },
+    { time: '31 OCT', name: 'The Wedding Day', detail: 'Cresta Marang Garden · Francistown', description: 'Strictly African wedding-day attire. Celebrate in African opulence with elegant traditional style.' },
     { time: '01 NOV', name: 'Kgoroso', detail: 'Block 3 · Francistown', description: 'A joyful closing celebration for both families.' },
   ],
   families: { bride: 'Together with their families', groom: 'In the presence of God' },
@@ -31,8 +30,8 @@ function App() {
   const [opened, setOpened] = useState(false)
   const [opening, setOpening] = useState(false)
   const [musicOn, setMusicOn] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const submitRsvp = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setSubmitted(true) }
+  const [menuOpen, setMenuOpen] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
   useEffect(() => {
     if (!opened) return
     const sections = document.querySelectorAll<HTMLElement>('.site > section')
@@ -40,18 +39,30 @@ function App() {
     sections.forEach((section) => observer.observe(section))
     return () => observer.disconnect()
   }, [opened])
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (musicOn) audio.play().catch(() => {})
+    else audio.pause()
+  }, [musicOn])
   const openInvitation = () => {
     if (opening || opened) return
     setOpening(true)
+    setMusicOn(true)
+    if (audioRef.current) {
+      audioRef.current.currentTime = 60
+      audioRef.current.play().catch(() => {})
+    }
     window.setTimeout(() => setOpened(true), 1400)
   }
   return <>
+    <audio ref={audioRef} src="/Under Your Wings (Official Lyric Video) – Grace Of Africa - Grace Of Africa.mp3" loop preload="auto" />
     <div className={`cover ${opening ? 'is-opening' : ''} ${opened ? 'is-open' : ''}`} aria-hidden={opened}>
       <div className="cover-glow" /><div className="envelope"><div className="envelope-flap" /><div className="envelope-card"><span>{wedding.couple.monogram}</span><p>With joy in our hearts</p><b>{wedding.couple.names}</b><small>{wedding.date}</small></div><div className="seal">M<span>S</span></div></div>
       <button className="open-button" onClick={openInvitation} disabled={opening || opened}><span>{opening ? 'Opening' : 'Tap to open'}</span><i>↗</i></button><p className="cover-note">Wedding celebration · Francistown, Botswana</p>
     </div>
     {opened && <main className="site">
-      <nav className="nav"><a className="nav-mark" href="#home">{wedding.couple.monogram}</a><div className="nav-links"><a href="#invitation">Invitation</a><a href="#details">Details</a><a href="#story">Our story</a><a href="#rsvp">RSVP</a></div><button className={`music ${musicOn ? 'playing' : ''}`} onClick={() => setMusicOn(!musicOn)} aria-label={musicOn ? 'Pause music' : 'Play music'}>♫ <span>{musicOn ? 'Playing' : 'Music'}</span></button></nav>
+      <nav className={`nav ${menuOpen ? 'menu-open' : ''}`}><a className="nav-mark" href="#home" onClick={() => setMenuOpen(false)}>{wedding.couple.monogram}</a><div className="nav-links"><a href="#invitation" onClick={() => setMenuOpen(false)}>Invitation</a><a href="#details" onClick={() => setMenuOpen(false)}>Details</a><a href="#story" onClick={() => setMenuOpen(false)}>Our story</a></div><button className={`music ${musicOn ? 'playing' : ''}`} onClick={() => setMusicOn(!musicOn)} aria-label={musicOn ? 'Mute music' : 'Unmute music'}>{musicOn ? '♫' : '♩'} <span>{musicOn ? 'Mute' : 'Unmute'}</span></button><button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}><span /><span /><span /></button></nav>
       <section className="hero-section" id="home"><div className="hero-copy"><p className="eyebrow">A new chapter begins</p><h1>{wedding.couple.first}<em>&</em>{wedding.couple.second}</h1><p className="hero-date">{wedding.date} <span>·</span> Francistown, Botswana</p></div><Placeholder className="hero-photo" /><div className="scroll-cue"><span /> Scroll to explore</div></section>
       <section className="invitation section" id="invitation"><div className="section-label">01 <span /> You are invited</div><div className="invitation-copy"><p className="eyebrow">To our dearest family and friends</p><h2>We are getting<br /><i>married.</i></h2><p className="large-copy">{wedding.invitation}</p><div className="scripture"><p>{wedding.scriptures[0].text}</p><span>{wedding.scriptures[0].reference}</span></div><div className="rule" /><p className="signature">{wedding.couple.names}</p><div className="family-line"><span>{wedding.families.bride}</span><b>under God</b><span>{wedding.families.groom}</span></div></div></section>
       <section className="countdown-section"><p className="eyebrow">Counting the days</p><h2>Until we say <i>“I do”</i></h2><Countdown /></section>
@@ -59,8 +70,7 @@ function App() {
       <section className="details section" id="details"><div className="section-label">02 <span /> The celebrations</div><div className="details-grid"><div><p className="eyebrow">Three days · one family</p><h2>A journey<br /><i>together.</i></h2><p className="body-copy">From the Magadi celebration to Kgoroso, we invite you to share in the traditions, prayers and joyful moments that bring our families together.</p><a className="text-link" href={wedding.venue.map} target="_blank" rel="noreferrer">Explore the wedding venue ↗</a></div><div className="programme"><p className="eyebrow">The programme</p>{wedding.events.map((event, index) => <div className="event" key={event.time}><time><span className="event-icon" aria-hidden="true">{['✦', '✧', '✦'][index]}</span>{event.time}</time><div><h3>{event.name}</h3><p>{event.detail}</p><small>{event.description}</small></div></div>)}</div></div></section>
       <section className="venue section"><div className="venue-photo"><Placeholder /><span className="photo-note">Cresta Marang Gardens</span></div><div className="venue-copy"><p className="eyebrow">The setting</p><h2>{wedding.venue.name}</h2><p className="body-copy">{wedding.venue.description}<br />{wedding.venue.address}</p><a className="outline-button" href={wedding.venue.map} target="_blank" rel="noreferrer"><span className="location-icon" aria-hidden="true">⌖</span> View location <span>↗</span></a></div></section>
       <section className="dress-code section"><div className="section-label">03 <span /> Guest colours</div><div className="dress-code-grid"><div><p className="eyebrow">A note for our guests</p><h2>Come dressed<br /><i>in celebration.</i></h2><p className="body-copy">{wedding.dressCode.attire}</p><p className="dress-note">{wedding.dressCode.note}</p></div><div className="palette"><p className="eyebrow">{wedding.dressCode.title}</p><div className="swatches">{wedding.dressCode.colors.map((color) => <div className="swatch" key={color.name}><span style={{ backgroundColor: color.value }} /><p>{color.name}</p></div>)}</div></div></div></section>
-      <section className="story section" id="story"><div className="section-label">03 <span /> Our story</div><div className="story-grid"><div className="story-heading"><p className="eyebrow">It started with a hello</p><h2>Two paths,<br /><i>one journey.</i></h2></div><div className="story-copy"><p>Some stories are written in grand gestures. Ours grew in the little moments: long walks, shared playlists, and the comfortable quiet of simply being together.</p><p>Now, surrounded by our favourite people, we are ready for the next beautiful chapter.</p><span className="story-initials">M <b>+</b> S</span></div></div><div className="gallery"><Placeholder /><Placeholder /><Placeholder /></div></section>
-      <section className="rsvp section" id="rsvp"><div className="rsvp-intro"><p className="eyebrow">04 · Kindly reply</p><h2>Will you join<br /><i>our celebration?</i></h2><p>We would be honoured to celebrate with you. Please reply by 01 September 2026.</p></div>{submitted ? <div className="success"><span>♡</span><h3>Thank you for your response.</h3><p>We look forward to celebrating with you.</p></div> : <form onSubmit={submitRsvp}><label>Full name<input required name="name" placeholder="Your name" /></label><label>Email address<input required type="email" name="email" placeholder="you@example.com" /></label><label>Will you attend?<select required name="attendance"><option value="">Please select</option><option>Yes, I will attend</option><option>No, I will not attend</option></select></label><label>Message <span className="optional">(optional)</span><textarea name="message" placeholder="A note for the couple..." /></label><button className="submit-button" type="submit">Send my RSVP <span>↗</span></button></form>}</section>
+        <section className="story section" id="story"><div className="section-label">03 <span /> Our story</div><div className="story-grid"><div className="story-heading"><p className="eyebrow">It started with Shalom</p><h2>Two paths,<br /><i>one journey.</i></h2></div><div className="story-copy"><p>Some stories are written in grand gestures. Ours grew in the little moments: long walks, shared playlists, and the comfortable quiet of simply being together.</p><p>Now, surrounded by our favourite people, we are ready for the next beautiful chapter.</p><span className="story-initials">M <b>+</b> S</span></div></div><div className="gallery"><Placeholder /><Placeholder /><Placeholder /></div></section>
       <footer><span>{wedding.couple.monogram}</span><p>Made with love for {wedding.date}</p><span>♡</span></footer>
     </main>}
   </>

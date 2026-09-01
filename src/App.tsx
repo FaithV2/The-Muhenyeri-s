@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import maxwellImage from './assets/Maxwell.jpeg'
+import maxwell2Image from './assets/Maxwell2.jpeg'
+import shirleyImage from './assets/Shirley.jpeg'
+import shirleyStandingImage from './assets/Shirleystanding.jpeg'
+import weAreGettingMarriedImage from './assets/wearegettingmarried.png'
 
 const wedding = {
   couple: { first: 'Maxwell', second: 'Shirley', monogram: 'M · S', names: 'Maxwell Muhenyeri & Shirley Mfuma' },
@@ -16,7 +21,13 @@ const wedding = {
   families: { bride: 'Together with their families', groom: 'In the presence of God' },
 }
 
-function Placeholder({ className = '' }: { className?: string }) { return <div className={`photo-placeholder ${className}`}><span>{wedding.couple.monogram}</span></div> }
+function PhotoFrame({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
+  return (
+    <div className={`photo-placeholder ${className}`}>
+      <img src={src} alt={alt} />
+    </div>
+  )
+}
 
 function Countdown() {
   const remainingTime = () => Math.max(0, new Date(wedding.isoDate).getTime() - Date.now())
@@ -50,7 +61,7 @@ function App() {
     setOpening(true)
     setMusicOn(true)
     if (audioRef.current) {
-      audioRef.current.currentTime = 60
+      audioRef.current.currentTime = 58
       audioRef.current.play().catch(() => {})
     }
     window.setTimeout(() => setOpened(true), 1400)
@@ -63,14 +74,14 @@ function App() {
     </div>
     {opened && <main className="site">
       <nav className={`nav ${menuOpen ? 'menu-open' : ''}`}><a className="nav-mark" href="#home" onClick={() => setMenuOpen(false)}>{wedding.couple.monogram}</a><div className="nav-links"><a href="#invitation" onClick={() => setMenuOpen(false)}>Invitation</a><a href="#details" onClick={() => setMenuOpen(false)}>Details</a><a href="#story" onClick={() => setMenuOpen(false)}>Our story</a></div><button className={`music ${musicOn ? 'playing' : ''}`} onClick={() => setMusicOn(!musicOn)} aria-label={musicOn ? 'Mute music' : 'Unmute music'}>{musicOn ? '♫' : '♩'} <span>{musicOn ? 'Mute' : 'Unmute'}</span></button><button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}><span /><span /><span /></button></nav>
-      <section className="hero-section" id="home"><div className="hero-copy"><p className="eyebrow">A new chapter begins</p><h1>{wedding.couple.first}<em>&</em>{wedding.couple.second}</h1><p className="hero-date">{wedding.date} <span>·</span> Francistown, Botswana</p></div><Placeholder className="hero-photo" /><div className="scroll-cue"><span /> Scroll to explore</div></section>
+      <section className="hero-section" id="home"><div className="hero-copy"><p className="eyebrow">A new chapter begins</p><h1>{wedding.couple.first}<em>&</em>{wedding.couple.second}</h1><p className="hero-date">{wedding.date} <span>·</span> Francistown, Botswana</p></div><PhotoFrame className="hero-photo hero-art" src={weAreGettingMarriedImage} alt="We are getting married" /><div className="scroll-cue"><span /> Scroll to explore</div></section>
       <section className="invitation section" id="invitation"><div className="section-label">01 <span /> You are invited</div><div className="invitation-copy"><p className="eyebrow">To our dearest family and friends</p><h2>We are getting<br /><i>married.</i></h2><p className="large-copy">{wedding.invitation}</p><div className="scripture"><p>{wedding.scriptures[0].text}</p><span>{wedding.scriptures[0].reference}</span></div><div className="rule" /><p className="signature">{wedding.couple.names}</p><div className="family-line"><span>{wedding.families.bride}</span><b>under God</b><span>{wedding.families.groom}</span></div></div></section>
       <section className="countdown-section"><p className="eyebrow">Counting the days</p><h2>Until we say <i>“I do”</i></h2><Countdown /></section>
       <section className="faith-section"><p className="eyebrow">A blessing for the journey</p><div className="scripture"><p>{wedding.scriptures[1].text}</p><span>{wedding.scriptures[1].reference}</span></div></section>
       <section className="details section" id="details"><div className="section-label">02 <span /> The celebrations</div><div className="details-grid"><div><p className="eyebrow">Three days · one family</p><h2>A journey<br /><i>together.</i></h2><p className="body-copy">From the Magadi celebration to Kgoroso, we invite you to share in the traditions, prayers and joyful moments that bring our families together.</p><a className="text-link" href={wedding.venue.map} target="_blank" rel="noreferrer">Explore the wedding venue ↗</a></div><div className="programme"><p className="eyebrow">The programme</p>{wedding.events.map((event, index) => <div className="event" key={event.time}><time><span className="event-icon" aria-hidden="true">{['✦', '✧', '✦'][index]}</span>{event.time}</time><div><h3>{event.name}</h3><p>{event.detail}</p><small>{event.description}</small></div></div>)}</div></div></section>
-      <section className="venue section"><div className="venue-photo"><Placeholder /><span className="photo-note">Cresta Marang Gardens</span></div><div className="venue-copy"><p className="eyebrow">The setting</p><h2>{wedding.venue.name}</h2><p className="body-copy">{wedding.venue.description}<br />{wedding.venue.address}</p><a className="outline-button" href={wedding.venue.map} target="_blank" rel="noreferrer"><span className="location-icon" aria-hidden="true">⌖</span> View location <span>↗</span></a></div></section>
+      <section className="venue section"><div className="venue-photo"><PhotoFrame src={shirleyStandingImage} alt="Shirley standing at the venue" /><span className="photo-note">Cresta Marang Gardens</span></div><div className="venue-copy"><p className="eyebrow">The setting</p><h2>{wedding.venue.name}</h2><p className="body-copy">{wedding.venue.description}<br />{wedding.venue.address}</p><a className="outline-button" href={wedding.venue.map} target="_blank" rel="noreferrer"><span className="location-icon" aria-hidden="true">⌖</span> View location <span>↗</span></a></div></section>
       <section className="dress-code section"><div className="section-label">03 <span /> Guest colours</div><div className="dress-code-grid"><div><p className="eyebrow">A note for our guests</p><h2>Come dressed<br /><i>in celebration.</i></h2><p className="body-copy">{wedding.dressCode.attire}</p><p className="dress-note">{wedding.dressCode.note}</p></div><div className="palette"><p className="eyebrow">{wedding.dressCode.title}</p><div className="swatches">{wedding.dressCode.colors.map((color) => <div className="swatch" key={color.name}><span style={{ backgroundColor: color.value }} /><p>{color.name}</p></div>)}</div></div></div></section>
-        <section className="story section" id="story"><div className="section-label">03 <span /> Our story</div><div className="story-grid"><div className="story-heading"><p className="eyebrow">It started with Shalom</p><h2>Two paths,<br /><i>one journey.</i></h2></div><div className="story-copy"><p>Some stories are written in grand gestures. Ours grew in the little moments: long walks, shared playlists, and the comfortable quiet of simply being together.</p><p>Now, surrounded by our favourite people, we are ready for the next beautiful chapter.</p><span className="story-initials">M <b>+</b> S</span></div></div><div className="gallery"><Placeholder /><Placeholder /><Placeholder /></div></section>
+        <section className="story section" id="story"><div className="section-label">03 <span /> Our story</div><div className="story-grid"><div className="story-heading"><p className="eyebrow">It started with Shalom</p><h2>Two paths,<br /><i>one journey.</i></h2></div><div className="story-copy"><p>Some stories are written in grand gestures. Ours grew in the little moments: long walks, shared playlists, and the comfortable quiet of simply being together.</p><p>Now, surrounded by our favourite people, we are ready for the next beautiful chapter.</p><span className="story-initials">M <b>+</b> S</span></div></div><div className="gallery"><PhotoFrame src={maxwellImage} alt="Maxwell" /><PhotoFrame src={weAreGettingMarriedImage} alt="Wedding artwork" /><PhotoFrame src={shirleyImage} alt="Shirley" /></div></section>
       <footer><span>{wedding.couple.monogram}</span><p>Made with love for {wedding.date}</p><span>♡</span></footer>
     </main>}
   </>
